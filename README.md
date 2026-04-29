@@ -18,6 +18,11 @@ LogiResearch is a full-stack, AI-powered platform designed to perform autonomous
 - **LiteLLM**: Standardized routing to support Google Gemini models (`gemini-1.5-flash`, `gemini-2.0-flash`, etc.).
 - **PyMuPDF**: Fast and reliable PDF parsing.
 
+**Logistics CI/CD Pipeline:**
+- **Flask (Python)**: RESTful API for shipment tracking and order management.
+- **Docker & Docker Compose**: Containerization for deployment.
+- **GitHub Actions**: Continuous Integration & Deployment.
+
 ---
 
 ## 🚀 Setup Instructions
@@ -37,6 +42,13 @@ LogiResearch is a full-stack, AI-powered platform designed to perform autonomous
 3. **Running the Application**
    - **Backend**: `uvicorn main:app --host 0.0.0.0 --port 8000`
    - **Frontend**: `npm run dev`
+
+4. **Running the Logistics CI/CD Pipeline**
+   - Navigate to `logistics_ci_cd/` and use Docker Compose:
+     ```bash
+     docker-compose up -d
+     ```
+   - Alternatively, navigate to `logistics_ci_cd/app/` and run `python app.py` (after installing `requirements.txt`).
 
 ---
 

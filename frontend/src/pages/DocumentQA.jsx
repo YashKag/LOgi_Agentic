@@ -280,6 +280,7 @@ const DocumentQA = () => {
                   <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                   <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
                   <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                  <option value="ollama-llama3">Ollama (Llama 3)</option>
                 </select>
               </div>
             )}

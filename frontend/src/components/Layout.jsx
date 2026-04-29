@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { Package, Search, LayoutDashboard, Wifi, WifiOff, Cpu, BookOpen } from 'lucide-react';
+import { Package, Search, LayoutDashboard, Wifi, WifiOff, Cpu, BookOpen, Activity } from 'lucide-react';
 import { reportService } from '../services/api';
 
 const Layout = () => {
@@ -94,6 +94,25 @@ const Layout = () => {
             <BookOpen className="w-4 h-4 flex-shrink-0" />
             Document Q&A
             <span className="ml-auto text-[9px] font-semibold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">RAG</span>
+          </NavLink>
+
+          <div className="pt-4 pb-2">
+            <div className="h-px w-full bg-zinc-800/80"></div>
+          </div>
+
+          <NavLink
+            to="/tracker"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm ${
+                isActive
+                  ? 'bg-blue-500/15 text-blue-400 font-medium border border-blue-500/25 shadow-sm shadow-blue-500/10'
+                  : 'text-zinc-400 hover:bg-zinc-700/40 hover:text-zinc-200'
+              }`
+            }
+          >
+            <Activity className="w-4 h-4 flex-shrink-0" />
+            Logistics CI/CD
+            <span className="ml-auto text-[9px] font-semibold uppercase tracking-wider text-blue-500 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full">LIVE</span>
           </NavLink>
         </nav>
 

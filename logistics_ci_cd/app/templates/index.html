@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LogiFlow — Logistics Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <span class="logo-icon">🚚</span>
+    <span class="logo-text">LogiFlow</span>
+  </div>
+  <nav>
+    <a href="#" class="nav-item active" onclick="showTab('dashboard')">
+      <span>📊</span> Dashboard
+    </a>
+    <a href="#" class="nav-item" onclick="showTab('shipments')">
+      <span>📦</span> Shipments
+    </a>
+    <a href="#" class="nav-item" onclick="showTab('inventory')">
+      <span>🏭</span> Inventory
+    </a>
+    <a href="#" class="nav-item" onclick="showTab('orders')">
+      <span>🛒</span> Orders
+    </a>
+    <a href="#" class="nav-item" onclick="showTab('routes')">
+      <span>🗺️</span> Route Optimizer
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="status-dot"></div>
+    <span id="health-label">Checking...</span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HEADER -->
+  <header class="topbar">
+    <h1 class="page-title" id="page-title">Dashboard</h1>
+    <div class="topbar-right">
+      <span class="badge badge-success" id="status-badge">● LIVE</span>
+      <span class="time" id="clock"></span>
+    </div>
+  </header>
+
+  <!-- ===== DASHBOARD TAB ===== -->
+  <section id="tab-dashboard" class="tab active">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+          <div class="stat-value" id="stat-shipments">0</div>
+          <div class="stat-label">Total Shipments</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏭</div>
+        <div class="stat-info">
+          <div class="stat-value" id="stat-inventory">0</div>
+          <div class="stat-label">Inventory Items</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-info">
+          <div class="stat-value" id="stat-orders">0</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <div class="stat-value" style="color:#22c55e">UP</div>
+          <div class="stat-label">System Health</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">⚡ Quick Actions</div>
+      <div class="quick-actions">
+        <button class="btn btn-primary" onclick="showTab('shipments')">📦 New Shipment</button>
+        <button class="btn btn-secondary" onclick="showTab('inventory')">🏭 Add Item</button>
+        <button class="btn btn-secondary" onclick="showTab('orders')">🛒 New Order</button>
+        <button class="btn btn-secondary" onclick="showTab('routes')">🗺️ Optimize Route</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">📦 Recent Shipments</div>
+      <div id="dashboard-shipments"><p class="muted">No shipments yet.</p></div>
+    </div>
+  </section>
+
+  <!-- ===== SHIPMENTS TAB ===== -->
+  <section id="tab-shipments" class="tab">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">➕ Create Shipment</div>
+        <form onsubmit="createShipment(event)">
+          <label>Shipment ID</label>
+          <input type="text" id="s-id" placeholder="e.g. SHP-001" required/>
+          <label>Origin</label>
+          <input type="text" id="s-origin" placeholder="e.g. Mumbai" required/>
+          <label>Destination</label>
+          <input type="text" id="s-dest" placeholder="e.g. Delhi" required/>
+          <label>Est. Delivery</label>
+          <input type="date" id="s-delivery"/>
+          <button class="btn btn-primary" type="submit">Create Shipment</button>
+        </form>
+        <div id="shipment-msg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">🔍 Track Shipment</div>
+        <form onsubmit="trackShipment(event)">
+          <label>Shipment ID</label>
+          <input type="text" id="track-id" placeholder="Enter Shipment ID" required/>
+          <button class="btn btn-secondary" type="submit">Track</button>
+        </form>
+        <div id="track-result" class="result-box" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">📋 All Shipments <button class="btn btn-sm" onclick="loadShipments()">🔄 Refresh</button></div>
+      <div id="shipments-list"><p class="muted">Loading...</p></div>
+    </div>
+  </section>
+
+  <!-- ===== INVENTORY TAB ===== -->
+  <section id="tab-inventory" class="tab">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">➕ Add Item</div>
+        <form onsubmit="addInventory(event)">
+          <label>Item ID</label>
+          <input type="text" id="i-id" placeholder="e.g. ITM-001" required/>
+          <label>Name</label>
+          <input type="text" id="i-name" placeholder="e.g. Laptop" required/>
+          <label>Quantity</label>
+          <input type="number" id="i-qty" placeholder="e.g. 50" min="0" required/>
+          <label>Location</label>
+          <input type="text" id="i-loc" placeholder="e.g. Warehouse A"/>
+          <label>Category</label>
+          <input type="text" id="i-cat" placeholder="e.g. Electronics"/>
+          <button class="btn btn-primary" type="submit">Add Item</button>
+        </form>
+        <div id="inv-msg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">🔍 Lookup Item</div>
+        <form onsubmit="lookupItem(event)">
+          <label>Item ID</label>
+          <input type="text" id="lookup-id" placeholder="Enter Item ID" required/>
+          <button class="btn btn-secondary" type="submit">Lookup</button>
+        </form>
+        <div id="lookup-result" class="result-box" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">📋 All Inventory <button class="btn btn-sm" onclick="loadInventory()">🔄 Refresh</button></div>
+      <div id="inventory-list"><p class="muted">Loading...</p></div>
+    </div>
+  </section>
+
+  <!-- ===== ORDERS TAB ===== -->
+  <section id="tab-orders" class="tab">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">➕ Create Order</div>
+        <form onsubmit="createOrder(event)">
+          <label>Order ID</label>
+          <input type="text" id="o-id" placeholder="e.g. ORD-001" required/>
+          <label>Customer</label>
+          <input type="text" id="o-customer" placeholder="e.g. John Doe" required/>
+          <label>Items (comma-separated)</label>
+          <input type="text" id="o-items" placeholder="e.g. Laptop, Phone"/>
+          <button class="btn btn-primary" type="submit">Create Order</button>
+        </form>
+        <div id="order-msg" class="msg"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">🔍 Track Order</div>
+        <form onsubmit="trackOrder(event)">
+          <label>Order ID</label>
+          <input type="text" id="order-track-id" placeholder="Enter Order ID" required/>
+          <button class="btn btn-secondary" type="submit">Track</button>
+        </form>
+        <div id="order-result" class="result-box" style="display:none"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ROUTES TAB ===== -->
+  <section id="tab-routes" class="tab">
+    <div class="card" style="max-width:600px">
+      <div class="card-header">🗺️ Route Optimizer</div>
+      <form onsubmit="optimizeRoute(event)">
+        <label>Start Location</label>
+        <input type="text" id="r-start" placeholder="e.g. Mumbai" required/>
+        <label>Waypoints (comma-separated)</label>
+        <input type="text" id="r-waypoints" placeholder="e.g. Pune, Nagpur"/>
+        <label>End Location</label>
+        <input type="text" id="r-end" placeholder="e.g. Delhi" required/>
+        <button class="btn btn-primary" type="submit">⚡ Optimize Route</button>
+      </form>
+      <div id="route-result" class="result-box" style="display:none;margin-top:1.5rem"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const API = '';
+
+// ---- TABS ----
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item')[['dashboard','shipments','inventory','orders','routes'].indexOf(name)].classList.add('active');
+  document.getElementById('page-title').innerText = {dashboard:'Dashboard',shipments:'Shipments',inventory:'Inventory',orders:'Orders',routes:'Route Optimizer'}[name];
+  if (name === 'shipments') loadShipments();
+  if (name === 'inventory') loadInventory();
+  if (name === 'dashboard') loadDashboard();
+}
+
+// ---- CLOCK ----
+setInterval(() => {
+  document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+}, 1000);
+
+// ---- HEALTH ----
+async function checkHealth() {
+  try {
+    const r = await fetch(API + '/health');
+    const d = await r.json();
+    document.getElementById('health-label').innerText = '● ' + (d.status || 'UP');
+    document.getElementById('health-label').style.color = '#22c55e';
+  } catch {
+    document.getElementById('health-label').innerText = '● DOWN';
+    document.getElementById('health-label').style.color = '#ef4444';
+  }
+}
+checkHealth();
+setInterval(checkHealth, 30000);
+
+// ---- DASHBOARD ----
+async function loadDashboard() {
+  try {
+    const [sh, inv] = await Promise.all([
+      fetch(API + '/shipments').then(r => r.json()),
+      fetch(API + '/inventory').then(r => r.json())
+    ]);
+    document.getElementById('stat-shipments').innerText = sh.count || 0;
+    document.getElementById('stat-inventory').innerText = inv.count || 0;
+
+    const shList = document.getElementById('dashboard-shipments');
+    if (!sh.shipments || sh.shipments.length === 0) {
+      shList.innerHTML = '<p class="muted">No shipments yet.</p>';
+    } else {
+      shList.innerHTML = buildTable(
+        ['ID','Origin','Destination','Status','Location'],
+        sh.shipments.slice(0,5).map(s => [s.shipment_id, s.origin, s.destination, badge(s.status), s.current_location])
+      );
+    }
+  } catch(e) { console.error(e); }
+}
+
+// ---- SHIPMENTS ----
+async function loadShipments() {
+  const el = document.getElementById('shipments-list');
+  try {
+    const d = await fetch(API + '/shipments').then(r => r.json());
+    document.getElementById('stat-shipments').innerText = d.count || 0;
+    if (!d.shipments || d.shipments.length === 0) {
+      el.innerHTML = '<p class="muted">No shipments yet. Create one above!</p>'; return;
+    }
+    el.innerHTML = buildTable(
+      ['ID','Origin','Destination','Status','Current Location','Est. Delivery'],
+      d.shipments.map(s => [s.shipment_id, s.origin, s.destination, badge(s.status), s.current_location, s.estimated_delivery || '—'])
+    );
+  } catch(e) { el.innerHTML = '<p class="muted error">Failed to load.</p>'; }
+}
+
+async function createShipment(e) {
+  e.preventDefault();
+  const msg = document.getElementById('shipment-msg');
+  try {
+    const r = await fetch(API + '/shipment', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        shipment_id: document.getElementById('s-id').value,
+        origin: document.getElementById('s-origin').value,
+        destination: document.getElementById('s-dest').value,
+        estimated_delivery: document.getElementById('s-delivery').value || undefined
+      })
+    });
+    const d = await r.json();
+    msg.className = 'msg ' + (r.ok ? 'success' : 'error');
+    msg.innerText = r.ok ? '✅ ' + d.message : '❌ ' + (d.error || 'Error');
+    if (r.ok) { e.target.reset(); loadShipments(); }
+  } catch { msg.className = 'msg error'; msg.innerText = '❌ Network error'; }
+}
+
+async function trackShipment(e) {
+  e.preventDefault();
+  const res = document.getElementById('track-result');
+  res.style.display = 'block';
+  try {
+    const r = await fetch(API + '/shipment/' + document.getElementById('track-id').value);
+    const d = await r.json();
+    if (!r.ok) { res.innerHTML = '<p class="error">❌ ' + d.error + '</p>'; return; }
+    res.innerHTML = `
+      <div class="info-grid">
+        <div><b>ID</b><span>${d.shipment_id}</span></div>
+        <div><b>Status</b><span>${badge(d.status)}</span></div>
+        <div><b>Origin</b><span>${d.origin}</span></div>
+        <div><b>Destination</b><span>${d.destination}</span></div>
+        <div><b>Current Location</b><span>${d.current_location}</span></div>
+        <div><b>Est. Delivery</b><span>${d.estimated_delivery || '—'}</span></div>
+      </div>
+      <p style="margin-top:1rem;font-weight:600;color:var(--muted)">Tracking History:</p>
+      ${d.tracking_history.map(h => `<div class="timeline-item"><span class="dot"></span><b>${h.location}</b> — ${h.status} <span class="muted">${h.timestamp.slice(0,19).replace('T',' ')}</span></div>`).join('')}`;
+  } catch { res.innerHTML = '<p class="error">❌ Network error</p>'; }
+}
+
+// ---- INVENTORY ----
+async function loadInventory() {
+  const el = document.getElementById('inventory-list');
+  try {
+    const d = await fetch(API + '/inventory').then(r => r.json());
+    document.getElementById('stat-inventory').innerText = d.count || 0;
+    if (!d.inventory || d.inventory.length === 0) {
+      el.innerHTML = '<p class="muted">No items yet. Add one above!</p>'; return;
+    }
+    el.innerHTML = buildTable(
+      ['ID','Name','Quantity','Location','Category','Last Updated'],
+      d.inventory.map(i => [i.item_id, i.name, `<b style="color:${i.quantity<10?'#ef4444':'#22c55e'}">${i.quantity}</b>`, i.location, i.category, i.last_updated.slice(0,19).replace('T',' ')])
+    );
+  } catch { el.innerHTML = '<p class="error">Failed to load.</p>'; }
+}
+
+async function addInventory(e) {
+  e.preventDefault();
+  const msg = document.getElementById('inv-msg');
+  try {
+    const r = await fetch(API + '/inventory', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        item_id: document.getElementById('i-id').value,
+        name: document.getElementById('i-name').value,
+        quantity: parseInt(document.getElementById('i-qty').value),
+        location: document.getElementById('i-loc').value || 'Warehouse',
+        category: document.getElementById('i-cat').value || 'General'
+      })
+    });
+    const d = await r.json();
+    msg.className = 'msg ' + (r.ok ? 'success' : 'error');
+    msg.innerText = r.ok ? '✅ ' + d.message : '❌ ' + (d.error || 'Error');
+    if (r.ok) { e.target.reset(); loadInventory(); }
+  } catch { msg.className = 'msg error'; msg.innerText = '❌ Network error'; }
+}
+
+async function lookupItem(e) {
+  e.preventDefault();
+  const res = document.getElementById('lookup-result');
+  res.style.display = 'block';
+  try {
+    const r = await fetch(API + '/inventory/' + document.getElementById('lookup-id').value);
+    const d = await r.json();
+    if (!r.ok) { res.innerHTML = '<p class="error">❌ ' + d.error + '</p>'; return; }
+    res.innerHTML = `<div class="info-grid">
+      <div><b>ID</b><span>${d.item_id}</span></div>
+      <div><b>Name</b><span>${d.name}</span></div>
+      <div><b>Quantity</b><span style="color:${d.quantity<10?'#ef4444':'#22c55e'};font-weight:700">${d.quantity}</span></div>
+      <div><b>Location</b><span>${d.location}</span></div>
+      <div><b>Category</b><span>${d.category}</span></div>
+    </div>`;
+  } catch { res.innerHTML = '<p class="error">❌ Network error</p>'; }
+}
+
+// ---- ORDERS ----
+async function createOrder(e) {
+  e.preventDefault();
+  const msg = document.getElementById('order-msg');
+  const itemsRaw = document.getElementById('o-items').value;
+  const items = itemsRaw ? itemsRaw.split(',').map(s => s.trim()) : [];
+  try {
+    const r = await fetch(API + '/order', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        order_id: document.getElementById('o-id').value,
+        customer: document.getElementById('o-customer').value,
+        items
+      })
+    });
+    const d = await r.json();
+    msg.className = 'msg ' + (r.ok ? 'success' : 'error');
+    msg.innerText = r.ok ? '✅ ' + d.message : '❌ ' + (d.error || 'Error');
+    if (r.ok) {
+      document.getElementById('stat-orders').innerText = parseInt(document.getElementById('stat-orders').innerText) + 1;
+      e.target.reset();
+    }
+  } catch { msg.className = 'msg error'; msg.innerText = '❌ Network error'; }
+}
+
+async function trackOrder(e) {
+  e.preventDefault();
+  const res = document.getElementById('order-result');
+  res.style.display = 'block';
+  try {
+    const r = await fetch(API + '/order/' + document.getElementById('order-track-id').value);
+    const d = await r.json();
+    if (!r.ok) { res.innerHTML = '<p class="error">❌ ' + d.error + '</p>'; return; }
+    res.innerHTML = `<div class="info-grid">
+      <div><b>Order ID</b><span>${d.order_id}</span></div>
+      <div><b>Customer</b><span>${d.customer}</span></div>
+      <div><b>Status</b><span>${badge(d.status)}</span></div>
+      <div><b>Items</b><span>${(d.items||[]).join(', ') || '—'}</span></div>
+      <div><b>Created</b><span>${d.created_at.slice(0,19).replace('T',' ')}</span></div>
+    </div>`;
+  } catch { res.innerHTML = '<p class="error">❌ Network error</p>'; }
+}
+
+// ---- ROUTES ----
+async function optimizeRoute(e) {
+  e.preventDefault();
+  const res = document.getElementById('route-result');
+  res.style.display = 'block';
+  res.innerHTML = '⏳ Optimizing...';
+  const wpRaw = document.getElementById('r-waypoints').value;
+  const waypoints = wpRaw ? wpRaw.split(',').map(s => s.trim()) : [];
+  try {
+    const r = await fetch(API + '/route/optimize', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        start: document.getElementById('r-start').value,
+        waypoints,
+        end: document.getElementById('r-end').value
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) { res.innerHTML = '<p class="error">❌ ' + d.error + '</p>'; return; }
+    const rt = d.route;
+    const stops = [rt.start, ...rt.waypoints, rt.end];
+    res.innerHTML = `
+      <div class="route-path">${stops.map((s,i) => `<span class="stop">${s}</span>${i < stops.length-1 ? '<span class="arrow">→</span>' : ''}`).join('')}</div>
+      <div class="info-grid" style="margin-top:1rem">
+        <div><b>Total Stops</b><span>${rt.total_stops}</span></div>
+        <div><b>Est. Time</b><span>${rt.estimated_time_minutes} min</span></div>
+        <div><b>Efficiency</b><span style="color:#22c55e">✅ ${rt.route_efficiency}</span></div>
+      </div>`;
+  } catch { res.innerHTML = '<p class="error">❌ Network error</p>'; }
+}
+
+// ---- HELPERS ----
+function badge(status) {
+  const colors = {pending:'#f59e0b',in_transit:'#3b82f6',delivered:'#22c55e',created:'#8b5cf6'};
+  return `<span class="status-badge" style="background:${colors[status]||'#64748b'}20;color:${colors[status]||'#64748b'}">${status}</span>`;
+}
+function buildTable(headers, rows) {
+  if (!rows.length) return '<p class="muted">No records found.</p>';
+  return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+// ---- INIT ----
+loadDashboard();
+</script>
+</body>
+</html>

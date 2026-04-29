@@ -54,7 +54,7 @@ def get_embeddings() -> GoogleGenerativeAIEmbeddings:
     if not api_key or api_key == "your_google_api_key_here":
         raise ValueError("GOOGLE_API_KEY must be set to use the RAG pipeline.")
     return GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-004",
+        model="models/gemini-embedding-001",
         google_api_key=api_key,
     )
 

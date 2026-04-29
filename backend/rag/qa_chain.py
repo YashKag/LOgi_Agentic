@@ -71,15 +71,21 @@ def answer_question(
     context = "\n\n---\n\n".join(f"[Excerpt {i+1}]\n{chunk}" for i, chunk in enumerate(chunks))
 
     # Build LLM chain
-    from agents.crew import SUPPORTED_MODELS
-    resolved_model = SUPPORTED_MODELS.get(model_name, "gemini-flash-latest")
-    
-    api_key = os.getenv("GOOGLE_API_KEY", "")
-    llm = ChatGoogleGenerativeAI(
-        model=resolved_model,
-        google_api_key=api_key,
-        temperature=0.1,  # Low temperature for factual, grounded answers
-    )
+    if model_name.startswith("ollama-"):
+        from langchain_community.chat_models import ChatOllama
+        # Extract the specific ollama model, e.g. "ollama-llama3" -> "llama3"
+        ollama_model = model_name.split("-", 1)[1]
+        llm = ChatOllama(model=ollama_model, temperature=0.1)
+    else:
+        from agents.crew import SUPPORTED_MODELS
+        resolved_model = SUPPORTED_MODELS.get(model_name, "gemini-flash-latest")
+        
+        api_key = os.getenv("GOOGLE_API_KEY", "")
+        llm = ChatGoogleGenerativeAI(
+            model=resolved_model,
+            google_api_key=api_key,
+            temperature=0.1,  # Low temperature for factual, grounded answers
+        )
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", SYSTEM_PROMPT),

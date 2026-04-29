@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import NewResearch from './pages/NewResearch';
 import Report from './pages/Report';
 import DocumentQA from './pages/DocumentQA';
+import LogisticsTracker from './pages/LogisticsTracker';
 
 // Add this to properly configure the font if you don't have it locally
 // This will normally go in index.html, but putting it here for simplicity
@@ -27,6 +28,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="new" element={<NewResearch />} />
           <Route path="documents" element={<DocumentQA />} />
+          <Route path="tracker" element={<LogisticsTracker />} />
           <Route path="report/:id" element={<Report />} />
           <Route path="dashboard" element={<Navigate to="/" replace />} />
         </Route>

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const isProd = import.meta.env.PROD;
+const BASE_URL = import.meta.env.VITE_API_URL || (isProd ? '' : 'http://localhost:8000');
 
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,
@@ -58,4 +59,71 @@ export const reportService = {
 
   /** Base URL for SSE streams */
   getStreamUrl: (taskId) => `${BASE_URL}/api/research/${taskId}/stream`,
+};
+
+// ==============================================
+// LOGISTICS CI/CD TRACKER API (FLASK BACKEND)
+// ==============================================
+
+const TRACKER_URL = import.meta.env.VITE_TRACKER_API_URL || (isProd ? '/tracker' : 'http://localhost:5000');
+
+const trackerApi = axios.create({
+  baseURL: TRACKER_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+export const trackerService = {
+  getHealth: async () => {
+    try {
+      const response = await axios.get(`${TRACKER_URL}/health`);
+      return response.data;
+    } catch {
+      return { status: 'DOWN' };
+    }
+  },
+  
+  getShipments: async () => {
+    const response = await trackerApi.get('/shipments');
+    return response.data;
+  },
+
+  getInventory: async () => {
+    const response = await trackerApi.get('/inventory');
+    return response.data;
+  },
+  
+  createShipment: async (data) => {
+    const response = await trackerApi.post('/shipment', data);
+    return response.data;
+  },
+  
+  createInventory: async (data) => {
+    const response = await trackerApi.post('/inventory', data);
+    return response.data;
+  },
+
+  trackShipment: async (id) => {
+    const response = await trackerApi.get(`/shipment/${id}`);
+    return response.data;
+  },
+
+  lookupInventoryItem: async (id) => {
+    const response = await trackerApi.get(`/inventory/${id}`);
+    return response.data;
+  },
+
+  createOrder: async (data) => {
+    const response = await trackerApi.post('/order', data);
+    return response.data;
+  },
+
+  trackOrder: async (id) => {
+    const response = await trackerApi.get(`/order/${id}`);
+    return response.data;
+  },
+
+  optimizeRoute: async (data) => {
+    const response = await trackerApi.post('/route/optimize', data);
+    return response.data;
+  }
 };

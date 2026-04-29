@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agentic-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - logistics
+    networks:
+      - agentic-net
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agentic-backend
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - SERPER_API_KEY=${SERPER_API_KEY:-}
+    volumes:
+      - ./backend/rag/chroma_db:/app/rag/chroma_db
+      - ./backend/rag/uploads:/app/rag/uploads
+    networks:
+      - agentic-net
+    restart: unless-stopped
+
+  logistics:
+    build:
+      context: ./logistics_ci_cd
+      dockerfile: Dockerfile
+    container_name: agentic-logistics
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    networks:
+      - agentic-net
+    restart: unless-stopped
+
+networks:
+  agentic-net:
+    driver: bridge

@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  logistics-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: logistics-app
+    image: logistics-app:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+    volumes:
+      # Mount app directory for hot reload during development
+      - ./app:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - logistics-network
+    restart: unless-stopped
+
+networks:
+  logistics-network:
+    driver: bridge
